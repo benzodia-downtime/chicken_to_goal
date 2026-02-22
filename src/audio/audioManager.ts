@@ -11,44 +11,47 @@ interface SynthNote {
 }
 
 const SAMPLE_RATE = 22050;
+const SUCCESS_SFX_URL = new URL("../../asset/snd/success.mp3", import.meta.url).href;
+const WIN_SFX_URL = new URL("../../asset/snd/win.mp3", import.meta.url).href;
+const BOMB_SFX_URL = new URL("../../asset/snd/bomb.mp3", import.meta.url).href;
+
+const MASTER_VOLUME = 0.84;
+const SUCCESS_VOLUME = 0.52;
+const BOMB_VOLUME = 0.43;
+const WIN_VOLUME = 0.66;
+const RESTART_VOLUME = 0.36;
 
 export class AudioManager {
   private unlocked = false;
   private muted = false;
 
+  private readonly successSfx: Howl;
   private readonly mineSfx: Howl;
   private readonly winSfx: Howl;
   private readonly restartSfx: Howl;
 
   public constructor() {
-    Howler.volume(0.9);
+    Howler.volume(MASTER_VOLUME);
+
+    this.successSfx = new Howl({
+      src: [SUCCESS_SFX_URL],
+      volume: SUCCESS_VOLUME,
+      preload: true,
+      html5: true,
+    });
 
     this.mineSfx = new Howl({
-      src: [
-        createClip(0.34, [
-          // Short "bang" impact with low body.
-          { start: 0, duration: 0.04, frequency: 208, volume: 0.25, waveform: "square" },
-          { start: 0.01, duration: 0.16, frequency: 118, volume: 0.33, waveform: "triangle" },
-          { start: 0.02, duration: 0.24, frequency: 62, volume: 0.31, waveform: "sine" },
-          { start: 0.05, duration: 0.06, frequency: 340, volume: 0.13, waveform: "square" },
-        ]),
-      ],
-      volume: 0.5,
+      src: [BOMB_SFX_URL],
+      volume: BOMB_VOLUME,
       preload: true,
+      html5: true,
     });
 
     this.winSfx = new Howl({
-      src: [
-        createClip(0.5, [
-          // "Ding-dong" confirmation.
-          { start: 0, duration: 0.12, frequency: 1046, volume: 0.34, waveform: "triangle" },
-          { start: 0.01, duration: 0.12, frequency: 1318, volume: 0.17, waveform: "sine" },
-          { start: 0.18, duration: 0.2, frequency: 784, volume: 0.36, waveform: "triangle" },
-          { start: 0.19, duration: 0.2, frequency: 988, volume: 0.16, waveform: "sine" },
-        ]),
-      ],
-      volume: 0.62,
+      src: [WIN_SFX_URL],
+      volume: WIN_VOLUME,
       preload: true,
+      html5: true,
     });
 
     this.restartSfx = new Howl({
@@ -58,7 +61,7 @@ export class AudioManager {
           { start: 0.09, duration: 0.16, frequency: 330, volume: 0.32, waveform: "sine" },
         ]),
       ],
-      volume: 0.5,
+      volume: RESTART_VOLUME,
       preload: true,
     });
   }
@@ -91,6 +94,10 @@ export class AudioManager {
 
   public playMine(): void {
     this.play(this.mineSfx);
+  }
+
+  public playSuccess(): void {
+    this.play(this.successSfx);
   }
 
   public playWin(): void {

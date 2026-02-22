@@ -466,7 +466,7 @@ export class GameScene {
             this.handleClear(index);
           },
           onSafe: (index, destination) => {
-            this.audio.playWin();
+            this.audio.playSuccess();
             this.vfx.ringPulse(destination.x, destination.y, 0x80ffe3);
             this.vfx.burst(destination.x, destination.y, 0x66f6de, 12, 46);
             this.setStatus(UI_TEXT.safeTile(index + 1), "neutral");
