@@ -84,6 +84,8 @@ const scaleContent = requireElement<HTMLElement>("#scaleContent");
 const DESIGN_WIDTH = 900;
 const DESIGN_HEIGHT = 760;
 
+scaleContent.style.setProperty("--design-width", `${DESIGN_WIDTH}px`);
+scaleContent.style.setProperty("--design-height", `${DESIGN_HEIGHT}px`);
 scaleContent.style.width = `${DESIGN_WIDTH}px`;
 scaleContent.style.height = `${DESIGN_HEIGHT}px`;
 
