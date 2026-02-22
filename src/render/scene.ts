@@ -37,6 +37,8 @@ export interface SceneBindings {
   restartButton: HTMLButtonElement;
   routeButton: HTMLButtonElement;
   muteButton: HTMLButtonElement;
+  masterVolumeInput: HTMLInputElement;
+  masterVolumeValue: HTMLSpanElement;
   statusText: HTMLParagraphElement;
   mineInput: HTMLInputElement;
 }
@@ -231,8 +233,15 @@ export class GameScene {
       this.updateMuteButton();
     }, { signal });
 
+    this.ui.masterVolumeInput.addEventListener("input", () => {
+      const raw = Number.parseFloat(this.ui.masterVolumeInput.value);
+      this.audio.setMasterVolume(raw);
+      this.updateMasterVolumeUi();
+    }, { signal });
+
     this.setRouteButtonCollapsed(true);
     this.updateMuteButton();
+    this.updateMasterVolumeUi();
   }
 
   private stepMineCount(delta: number): void {
@@ -622,5 +631,9 @@ export class GameScene {
 
   private updateMuteButton(): void {
     this.uiController.updateMuteButton(this.audio.isMuted());
+  }
+
+  private updateMasterVolumeUi(): void {
+    this.uiController.syncMasterVolume(this.audio.getMasterVolume());
   }
 }

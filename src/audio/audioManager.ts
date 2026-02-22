@@ -92,6 +92,16 @@ export class AudioManager {
     return this.muted;
   }
 
+  public getMasterVolume(): number {
+    return Howler.volume();
+  }
+
+  public setMasterVolume(volume: number): number {
+    const normalized = Math.max(0, Math.min(1, volume));
+    Howler.volume(normalized);
+    return normalized;
+  }
+
   public playMine(): void {
     this.play(this.mineSfx);
   }

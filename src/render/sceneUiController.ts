@@ -8,6 +8,8 @@ export interface SceneUiBindings {
   startOverlay: HTMLDivElement;
   routeButton: HTMLButtonElement;
   muteButton: HTMLButtonElement;
+  masterVolumeInput: HTMLInputElement;
+  masterVolumeValue: HTMLSpanElement;
   statusText: HTMLParagraphElement;
 }
 
@@ -82,6 +84,12 @@ export class SceneUiController {
   public updateMuteButton(muted: boolean): void {
     this.ui.muteButton.textContent = muted ? "소리 켜기" : "소리 끄기";
     this.ui.muteButton.classList.toggle("muted", muted);
+  }
+
+  public syncMasterVolume(volume: number): void {
+    const normalized = Math.max(0, Math.min(1, volume));
+    this.ui.masterVolumeInput.value = normalized.toFixed(2);
+    this.ui.masterVolumeValue.textContent = `${Math.round(normalized * 100)}%`;
   }
 
   public destroy(): void {

@@ -40,6 +40,19 @@ root.innerHTML = `
           <button id="restartButton" class="btn">새 게임</button>
           <button id="routeButton" class="btn btn-ghost">탈출로 탐색</button>
           <button id="muteButton" class="btn btn-ghost">소리 끄기</button>
+          <label class="volume-control" for="masterVolumeInput">
+            <span class="volume-label">마스터 볼륨</span>
+            <input
+              id="masterVolumeInput"
+              class="volume-slider"
+              type="range"
+              min="0"
+              max="1"
+              step="0.01"
+              value="0.84"
+            />
+            <span id="masterVolumeValue" class="volume-value">84%</span>
+          </label>
         </div>
       </div>
     </section>
@@ -58,6 +71,8 @@ const scene = new GameScene({
   restartButton: requireElement<HTMLButtonElement>("#restartButton"),
   routeButton: requireElement<HTMLButtonElement>("#routeButton"),
   muteButton: requireElement<HTMLButtonElement>("#muteButton"),
+  masterVolumeInput: requireElement<HTMLInputElement>("#masterVolumeInput"),
+  masterVolumeValue: requireElement<HTMLSpanElement>("#masterVolumeValue"),
   statusText: requireElement<HTMLParagraphElement>("#statusText"),
   mineInput: requireElement<HTMLInputElement>("#mineInput"),
 });
