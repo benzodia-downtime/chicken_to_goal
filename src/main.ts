@@ -81,8 +81,8 @@ const scene = new GameScene({
 const scaleViewport = requireElement<HTMLDivElement>("#scaleViewport");
 const scaleContent = requireElement<HTMLElement>("#scaleContent");
 
-const DESIGN_WIDTH = 900;
-const DESIGN_HEIGHT = 760;
+const DESIGN_WIDTH = 800;
+const DESIGN_HEIGHT = 800;
 
 scaleContent.style.setProperty("--design-width", `${DESIGN_WIDTH}px`);
 scaleContent.style.setProperty("--design-height", `${DESIGN_HEIGHT}px`);

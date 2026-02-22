@@ -61,8 +61,8 @@ body {
 .shell {
   position: relative;
   z-index: 1;
-  width: var(--design-width, 900px);
-  height: var(--design-height, 760px);
+  width: var(--design-width, 800px);
+  height: var(--design-height, 800px);
   margin: 0;
   transform-origin: center center;
   will-change: transform;
@@ -122,7 +122,7 @@ body {
   top: 0;
   bottom: 0;
   left: 50%;
-  width: min(100%, calc(var(--design-width, 900px) - 24px));
+  width: min(100%, calc(var(--design-width, 800px) - 24px));
   transform: translateX(-50%);
   border-radius: 16px;
   pointer-events: none;
