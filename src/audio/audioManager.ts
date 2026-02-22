@@ -16,8 +16,8 @@ const WIN_SFX_URL = new URL("../../asset/snd/win.mp3", import.meta.url).href;
 const BOMB_SFX_URL = new URL("../../asset/snd/bomb.mp3", import.meta.url).href;
 
 const MASTER_VOLUME = 0.84;
-const SUCCESS_VOLUME = 0.78;
-const BOMB_VOLUME = 0.29;
+const SUCCESS_VOLUME = 1;
+const BOMB_VOLUME = 0.15;
 const WIN_VOLUME = 0.66;
 const RESTART_VOLUME = 0.36;
 
