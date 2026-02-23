@@ -130,6 +130,7 @@ export class TileRenderSystem {
     const tile = context.board.tiles[index];
     const isCurrent = index === context.state.currentIndex;
     const isVisitedSafe = context.state.visitedSafe.has(index);
+    const isClear = context.state.phase === "clear";
     const isGoal = index === context.board.goalIndex;
     const isMineVisible = context.revealMines && tile.isMine;
     const isHover = context.hoverIndex === index;
@@ -146,6 +147,20 @@ export class TileRenderSystem {
         labelAlpha: 0.14,
         mineVisible: true,
         pulseScale: isCurrent ? 1.05 : 1,
+      };
+    }
+
+    if (isClear && isVisitedSafe) {
+      return {
+        fill: 0x4b7a5f,
+        fillAlpha: 0.95,
+        stroke: 0xa0c8ae,
+        glowColor: 0x8ec2a4,
+        glowAlpha: isCurrent ? 0.16 : 0.08,
+        labelTint: 0x143624,
+        labelAlpha: 0.96,
+        mineVisible: false,
+        pulseScale: isCurrent ? 1.01 : 1,
       };
     }
 

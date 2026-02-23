@@ -5,6 +5,8 @@ import type { StatusTone } from "./statusTone";
 export interface SceneUiBindings {
   failOverlay: HTMLDivElement;
   failText: HTMLParagraphElement;
+  winOverlay: HTMLDivElement;
+  winText: HTMLParagraphElement;
   startOverlay: HTMLDivElement;
   routeButton: HTMLButtonElement;
   muteButton: HTMLButtonElement;
@@ -74,6 +76,43 @@ export class SceneUiController {
     });
   }
 
+  public setWinOverlay(show: boolean): void {
+    gsap.killTweensOf(this.ui.winOverlay);
+    gsap.killTweensOf(this.ui.winText);
+
+    if (!show) {
+      this.ui.winOverlay.classList.add("hidden");
+      this.ui.winOverlay.setAttribute("aria-hidden", "true");
+      this.ui.winOverlay.style.opacity = "";
+      this.ui.winText.style.opacity = "";
+      this.ui.winText.style.transform = "";
+      return;
+    }
+
+    this.ui.winOverlay.classList.remove("hidden");
+    this.ui.winOverlay.setAttribute("aria-hidden", "false");
+    gsap.set(this.ui.winOverlay, { opacity: 0 });
+    gsap.set(this.ui.winText, {
+      opacity: 0,
+      scale: 0.65,
+      y: 14,
+      transformOrigin: "50% 50%",
+    });
+
+    gsap.to(this.ui.winOverlay, {
+      opacity: 1,
+      duration: 0.22,
+      ease: "power2.out",
+    });
+    gsap.to(this.ui.winText, {
+      opacity: 1,
+      scale: 1,
+      y: 0,
+      duration: 0.24,
+      ease: "back.out(1.4)",
+    });
+  }
+
   public setRouteButtonCollapsed(collapsed: boolean): void {
     this.ui.routeButton.classList.toggle("is-collapsed", collapsed);
     this.ui.routeButton.disabled = collapsed;
@@ -95,5 +134,7 @@ export class SceneUiController {
   public destroy(): void {
     gsap.killTweensOf(this.ui.failOverlay);
     gsap.killTweensOf(this.ui.failText);
+    gsap.killTweensOf(this.ui.winOverlay);
+    gsap.killTweensOf(this.ui.winText);
   }
 }

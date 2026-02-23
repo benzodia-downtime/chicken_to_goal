@@ -20,6 +20,9 @@ root.innerHTML = `
             <div id="failOverlay" class="fail-overlay hidden" aria-hidden="true">
               <p id="failText" class="fail-text">실패!</p>
             </div>
+            <div id="winOverlay" class="win-overlay hidden" aria-hidden="true">
+              <p id="winText" class="win-text">성공!</p>
+            </div>
 
             <p id="statusText" class="status floating-status"></p>
 
@@ -66,6 +69,8 @@ const scene = new GameScene({
   flashLayer: requireElement<HTMLDivElement>("#flashLayer"),
   failOverlay: requireElement<HTMLDivElement>("#failOverlay"),
   failText: requireElement<HTMLParagraphElement>("#failText"),
+  winOverlay: requireElement<HTMLDivElement>("#winOverlay"),
+  winText: requireElement<HTMLParagraphElement>("#winText"),
   startOverlay: requireElement<HTMLDivElement>("#startOverlay"),
   mineDownButton: requireElement<HTMLButtonElement>("#mineDownButton"),
   mineUpButton: requireElement<HTMLButtonElement>("#mineUpButton"),

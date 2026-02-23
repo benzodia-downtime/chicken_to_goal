@@ -30,6 +30,8 @@ export interface SceneBindings {
   flashLayer: HTMLDivElement;
   failOverlay: HTMLDivElement;
   failText: HTMLParagraphElement;
+  winOverlay: HTMLDivElement;
+  winText: HTMLParagraphElement;
   startOverlay: HTMLDivElement;
   mineDownButton: HTMLButtonElement;
   mineUpButton: HTMLButtonElement;
@@ -78,6 +80,9 @@ export class GameScene {
     },
     setFailOverlay: (show) => {
       this.setFailOverlay(show);
+    },
+    setWinOverlay: (show) => {
+      this.setWinOverlay(show);
     },
     setRouteButtonCollapsed: (collapsed) => {
       this.setRouteButtonCollapsed(collapsed);
@@ -266,6 +271,7 @@ export class GameScene {
     this.outcomeController.clearFailureFeather();
     this.token.visible = true;
     this.setFailOverlay(false);
+    this.setWinOverlay(false);
     this.setRouteButtonCollapsed(true);
   }
 
@@ -564,6 +570,7 @@ export class GameScene {
       board: this.board,
       state: this.state,
       tileViews: this.tileViews,
+      tileSize: this.tileSize,
     };
   }
 
@@ -623,6 +630,10 @@ export class GameScene {
 
   private setFailOverlay(show: boolean): void {
     this.uiController.setFailOverlay(show);
+  }
+
+  private setWinOverlay(show: boolean): void {
+    this.uiController.setWinOverlay(show);
   }
 
   private setRouteButtonCollapsed(collapsed: boolean): void {

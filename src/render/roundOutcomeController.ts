@@ -21,12 +21,23 @@ export interface OutcomeContext {
   board: BoardData;
   state: GameState;
   tileViews: TileView[];
+  tileSize: number;
+}
+
+interface FireworkArea {
+  left: number;
+  right: number;
+  top: number;
+  bottom: number;
+  width: number;
+  height: number;
 }
 
 export interface OutcomeHooks {
   setRevealMines: (value: boolean) => void;
   renderAllTiles: () => void;
   setFailOverlay: (show: boolean) => void;
+  setWinOverlay: (show: boolean) => void;
   setRouteButtonCollapsed: (collapsed: boolean) => void;
   setStatus: (message: string, tone: StatusTone) => void;
 }
@@ -38,6 +49,7 @@ export class RoundOutcomeController {
   private readonly token: PIXI.Container;
   private readonly fxLayer: PIXI.Container;
   private failureFeather: PIXI.Graphics | null = null;
+  private celebrationLoop: gsap.core.Timeline | null = null;
 
   public constructor(
     vfx: VfxLike,
@@ -59,6 +71,7 @@ export class RoundOutcomeController {
     hooks: OutcomeHooks,
     message: string,
   ): void {
+    this.stopCelebrationLoop();
     context.state.phase = "dead";
     hooks.setRevealMines(true);
     hooks.renderAllTiles();
@@ -70,6 +83,7 @@ export class RoundOutcomeController {
     this.token.visible = false;
     this.showFailureFeather(center.x, center.y);
     hooks.setFailOverlay(true);
+    hooks.setWinOverlay(false);
     hooks.setRouteButtonCollapsed(false);
     this.audio.playMine();
     hooks.setStatus(message, "lose");
@@ -81,23 +95,31 @@ export class RoundOutcomeController {
     hooks: OutcomeHooks,
     message: string,
   ): void {
+    this.stopCelebrationLoop();
     context.state.phase = "clear";
+    hooks.setRevealMines(true);
     hooks.setFailOverlay(false);
+    hooks.setWinOverlay(true);
     hooks.setRouteButtonCollapsed(true);
     this.clearFailureFeather();
     this.token.visible = true;
     hooks.renderAllTiles();
 
-    const center = context.tileViews[targetIndex].center;
+    const goalCenter = context.tileViews[targetIndex].center;
+    const kickoffX = goalCenter.x + randomRange(-context.tileSize * 1.4, context.tileSize * 1.4);
+    const kickoffY =
+      goalCenter.y - context.tileSize * (0.25 + Math.random() * 0.5);
+    hooks.setStatus(`\uC131\uACF5! ${message}`, "win");
     this.vfx.flash("rgba(255, 219, 111, 0.88)", 0.88, 0.5);
-    this.vfx.burst(center.x, center.y, 0xffd666, 42, 88);
-    this.vfx.burst(center.x, center.y, 0x8affdc, 28, 76);
+    this.vfx.burst(kickoffX, kickoffY, 0xffd666, 42, 88);
+    this.vfx.burst(kickoffX, kickoffY, 0x8affdc, 28, 76);
+    this.startCelebrationLoop(context);
     this.audio.playWin();
-    this.celebrateSafeTiles(context.board, context.tileViews);
-    hooks.setStatus(message, "win");
+    this.celebrateSafeTiles(context.board, context.state, context.tileViews);
   }
 
   public clearFailureFeather(): void {
+    this.stopCelebrationLoop();
     if (!this.failureFeather) {
       return;
     }
@@ -106,9 +128,13 @@ export class RoundOutcomeController {
     this.failureFeather = null;
   }
 
-  private celebrateSafeTiles(board: BoardData, tileViews: TileView[]): void {
+  private celebrateSafeTiles(
+    board: BoardData,
+    state: GameState,
+    tileViews: TileView[],
+  ): void {
     for (const tile of board.tiles) {
-      if (tile.isMine) {
+      if (tile.isMine || !state.visitedSafe.has(tile.index)) {
         continue;
       }
 
@@ -123,6 +149,92 @@ export class RoundOutcomeController {
         ease: "power2.out",
       });
     }
+  }
+
+  private startCelebrationLoop(context: OutcomeContext): void {
+    this.stopCelebrationLoop();
+    const area = this.resolveFireworkArea(context.tileViews, context.tileSize);
+
+    let wave = 0;
+    const nextWave = (): void => {
+      this.launchVictoryFireworks(area, wave);
+      wave = (wave + 1) % 6;
+    };
+
+    this.celebrationLoop = gsap.timeline({ repeat: -1, repeatDelay: 0.4 });
+    this.celebrationLoop.call(nextWave, [], 0);
+    this.celebrationLoop.call(nextWave, [], 0.4);
+    this.celebrationLoop.call(nextWave, [], 0.84);
+  }
+
+  private stopCelebrationLoop(): void {
+    if (!this.celebrationLoop) {
+      return;
+    }
+    this.celebrationLoop.kill();
+    this.celebrationLoop = null;
+  }
+
+  private launchVictoryFireworks(area: FireworkArea, wave: number): void {
+    const palette = [0xffd666, 0x8affdc, 0xff97c2, 0x9ecbff, 0xc7ff8a];
+    const burstCount = 5 + (wave % 3);
+
+    for (let shot = 0; shot < burstCount; shot += 1) {
+      const point = this.pickFireworkPoint(area, wave, shot);
+      const primary = palette[(shot + wave) % palette.length];
+      const secondary = palette[(shot + wave + 2) % palette.length];
+
+      this.vfx.ringPulse(point.x, point.y, primary);
+      this.vfx.burst(point.x, point.y, primary, 22 + wave * 2, 80 + shot * 3);
+      this.vfx.burst(point.x, point.y, secondary, 15 + wave, 66 + shot * 2);
+    }
+  }
+
+  private resolveFireworkArea(tileViews: TileView[], tileSize: number): FireworkArea {
+    let minX = Number.POSITIVE_INFINITY;
+    let maxX = Number.NEGATIVE_INFINITY;
+    let minY = Number.POSITIVE_INFINITY;
+    let maxY = Number.NEGATIVE_INFINITY;
+
+    for (const view of tileViews) {
+      const { x, y } = view.center;
+      if (x < minX) minX = x;
+      if (x > maxX) maxX = x;
+      if (y < minY) minY = y;
+      if (y > maxY) maxY = y;
+    }
+
+    const half = tileSize * 0.5;
+    const padX = Math.max(34, tileSize * 0.8);
+    const padTop = Math.max(22, tileSize * 0.45);
+    const padBottom = Math.max(56, tileSize * 1.2);
+    const left = minX - half - padX;
+    const right = maxX + half + padX;
+    const top = minY - half - padTop;
+    const bottom = maxY + half + padBottom;
+
+    return {
+      left,
+      right,
+      top,
+      bottom,
+      width: right - left,
+      height: bottom - top,
+    };
+  }
+
+  private pickFireworkPoint(area: FireworkArea, wave: number, shot: number): PIXI.Point {
+    const lane = (wave + shot) % 3;
+    const laneCenter = lane === 0 ? 0.2 : lane === 1 ? 0.5 : 0.8;
+    const xBase = area.left + area.width * laneCenter;
+    const xJitter = area.width * (0.08 + Math.random() * 0.14);
+    const yBand = 0.34 + ((wave + shot) % 4) * 0.13;
+    const yBase = area.top + area.height * yBand;
+
+    return new PIXI.Point(
+      xBase + randomRange(-xJitter, xJitter),
+      yBase + randomRange(-area.height * 0.07, area.height * 0.07),
+    );
   }
 
   private showFailureFeather(x: number, y: number): void {
@@ -156,4 +268,8 @@ export class RoundOutcomeController {
       repeat: -1,
     });
   }
+}
+
+function randomRange(min: number, max: number): number {
+  return min + Math.random() * (max - min);
 }
